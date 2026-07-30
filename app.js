@@ -476,6 +476,7 @@
 
   function renderPlanning(data) {
     const planning = data.planning;
+    const planningAnchor = data.allDays.find((day) => day >= data.today) || data.allDays[data.allDays.length - 1] || null;
     setText("planningDayCount", data.workDays.length);
     setText("planningTimedCount", planning.timed);
     setText("planningProvisionalCount", planning.provisional);
@@ -498,13 +499,17 @@
     $("planningList").innerHTML = Object.entries(grouped).map(([monthKey, monthRecords]) => {
       const rows = monthRecords.map((record) => {
         const plan = record.plan;
+        const isToday = isSameDay(record.date, data.today);
+        const isAnchor = planningAnchor && isSameDay(record.date, planningAnchor);
         const roleTags = record.roles.length
           ? record.roles.map((role) => `<span class="shift-role ${role.toLowerCase()}">${role}</span>`).join("")
           : plan.worked ? '<span class="shift-role standard">STANDARD</span>' : "";
         const provisionalTag = plan.provisional ? '<span class="provisional-badge">Prévisionnel</span>' : "";
         const timeLabel = record.timed ? `${plan.start}–${plan.end}` : plan.worked ? "Horaires à compléter" : "Journée de repos";
         const pauseLine = record.timed ? `<span class="planning-pause-line">${renderPlanningPauses(plan)}</span>` : "";
-        return `<button class="planning-row ${plan.worked ? "work" : "off"} ${plan.provisional ? "provisional" : ""}" type="button" data-edit-day="${record.dateKey}">
+        const todayAttributes = isToday ? ' data-planning-today="true" aria-current="date"' : "";
+        const anchorAttribute = isAnchor ? ' data-planning-anchor="true"' : "";
+        return `<button class="planning-row ${plan.worked ? "work" : "off"} ${plan.provisional ? "provisional" : ""} ${isToday ? "today" : ""}" type="button" data-edit-day="${record.dateKey}"${todayAttributes}${anchorAttribute}>
           <span class="planning-date"><strong>${WEEKDAY_SHORT[record.date.getDay()]}</strong><b>${record.date.getDate()}</b></span>
           <span class="planning-main"><strong>${escapeHtml(plan.worked ? (plan.attraction || "Sans attraction") : "Repos")}</strong><small>${escapeHtml(timeLabel)}</small>${pauseLine}${provisionalTag}</span>
           <span class="planning-role">${roleTags}</span>
@@ -1246,6 +1251,15 @@
       renderPlanning(getContractData());
     });
     $("planningList").addEventListener("click", (event) => { const button = event.target.closest("[data-edit-day]"); if (button) openDayEditor(button.dataset.editDay); });
+    $("jumpTodayPlanning").addEventListener("click", () => {
+      state.planningFilter = "all";
+      document.querySelectorAll("#planningFilter button").forEach((button) => button.classList.toggle("active", button.dataset.planningFilter === "all"));
+      renderPlanning(getContractData());
+      requestAnimationFrame(() => {
+        const target = document.querySelector("[data-planning-today]") || document.querySelector("[data-planning-anchor]") || $("planningList");
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
     $("hoursPeriod").addEventListener("change", (event) => { state.hoursPeriod = event.target.value; renderHours(getContractData()); });
     $("hoursBreakdown").addEventListener("click", (event) => { const button = event.target.closest("[data-edit-day]"); if (button) openDayEditor(button.dataset.editDay); });
     ["payrollVariableStart", "payrollVariableEnd", "payrollOtherOrdinary", "payrollRecall", "payrollOfficialHs25", "payrollOfficialHs50", "payrollWithholdingRate"]

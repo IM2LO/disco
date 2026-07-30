@@ -216,6 +216,8 @@ h1, h2, h3, strong { letter-spacing: 0; }
 .view-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .view-title h1 { margin: 0; }
 .text-button { min-height: 36px; padding: 0 11px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-size: .72rem; font-weight: 850; }
+.today-jump-button { color: var(--acid); border-color: color-mix(in srgb, var(--acid) 42%, var(--line)); }
+.today-jump-button:active { color: var(--acid-ink); background: var(--acid); }
 .round-action { width: 48px; height: 48px; border: 0; border-radius: 50%; color: var(--acid-ink); background: var(--acid); font-size: 2rem; line-height: 1; }
 .view-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 
@@ -348,6 +350,9 @@ h1, h2, h3, strong { letter-spacing: 0; }
 .planning-row:active, .hour-row:active { background: var(--surface-3); }
 .planning-row.off { opacity: .48; }
 .planning-row.provisional { box-shadow: inset 3px 0 var(--coral); }
+.planning-row.today { position: relative; z-index: 1; opacity: 1; background: color-mix(in srgb, var(--acid) 7%, transparent); outline: 1px solid color-mix(in srgb, var(--acid) 34%, transparent); outline-offset: -1px; scroll-margin-block: 38vh; }
+.planning-row.today .planning-date { color: var(--acid); background: color-mix(in srgb, var(--acid) 9%, transparent); }
+.planning-row.today .planning-date strong { color: var(--acid); }
 .planning-date { display: grid; place-items: center; align-content: center; align-self: stretch; border-right: 1px solid var(--line); }
 .planning-date strong { color: var(--quiet); font-size: .52rem; text-transform: uppercase; }
 .planning-date b { font-size: 1.1rem; }
