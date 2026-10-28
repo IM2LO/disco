@@ -1,371 +1,110 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0d10">
-  <meta name="color-scheme" content="dark">
-  <title>Cap Contrat</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#0b0d10" name="theme-color"/>
+<meta content="dark" name="color-scheme"/>
+<title>Disco1</title>
+<link href="styles.css" rel="stylesheet"/>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="app-header">
-      <button class="brand" type="button" data-go="home" aria-label="Revenir à l'accueil">
-        <span class="brand-mark" aria-hidden="true">C</span>
-        <span><strong id="contractNameHeader">Cap Contrat</strong><small id="headerDate">Aujourd'hui</small></span>
-      </button>
-      <button class="icon-button" id="openSettings" type="button" aria-label="Ouvrir les réglages" title="Réglages">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.96 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1H3v-4h.08A1.7 1.7 0 0 0 4.6 8.96a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.56V3h4v.08A1.7 1.7 0 0 0 15.04 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.15.6.68 1 1.3 1H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>
-      </button>
-    </header>
+<div class="app-shell">
+<header class="app-header">
+<button aria-label="Disco1 — Planning" class="brand" data-go="planning" type="button">
+<span aria-hidden="true" class="brand-mark">D</span>
+<span><strong id="contractNameHeader">Disco1</strong><small id="headerDate">Aujourd'hui</small></span>
+</button>
+<button aria-label="Ouvrir les réglages" class="icon-button" id="openSettings" title="Réglages" type="button">
+<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.96 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1H3v-4h.08A1.7 1.7 0 0 0 4.6 8.96a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.56V3h4v.08A1.7 1.7 0 0 0 15.04 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.15.6.68 1 1.3 1H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"></path></svg>
+</button>
+</header>
+<main class="app-main">
 
-    <main class="app-main">
-      <section class="view active" id="view-home" aria-labelledby="homeTitle">
-        <div class="mission-intro">
-          <p class="kicker">Mission en cours</p>
-          <h1 id="homeTitle">Garder le cap.</h1>
-          <p id="contractRange">Du -- au --</p>
-        </div>
+<section aria-labelledby="planningTitle" class="view active" id="view-planning">
+<div class="view-title planning-view-title">
+<div><p class="kicker">Vue opérationnelle</p><h1 id="planningTitle">Planning</h1></div>
+<div class="view-actions">
+<button aria-label="Aller à la journée en cours dans le planning" class="text-button today-jump-button" id="jumpTodayPlanning" type="button">Aujourd'hui</button>
 
-        <section class="time-rail" aria-label="Progression du contrat">
-          <div class="rail-heading">
-            <div><span>Progression réelle</span><strong id="progressPercent">0 %</strong></div>
-            <span class="level-pill" id="levelPill">Niveau 1</span>
-          </div>
-          <div class="rail-track" aria-hidden="true">
-            <span class="rail-fill" id="progressFill"></span>
-            <span class="rail-marker" id="progressMarker"><i></i></span>
-          </div>
-          <div class="rail-labels"><span>Départ</span><span id="railToday">Aujourd'hui</span><span>Arrivée</span></div>
-        </section>
 
-        <section class="countdown-hero" aria-label="Temps restant">
-          <div class="countdown-copy">
-            <span>Encore</span>
-            <strong><b id="countDays">0</b> jours</strong>
-            <small id="countdownDetail">00 h · 00 min · 00 s</small>
-          </div>
-          <div class="day-slice" aria-hidden="true"><span id="daySlice"></span></div>
-        </section>
+</div>
+</div>
+<div aria-label="Résumé du planning" class="planning-summary">
+<article><strong id="planningDayCount">0</strong><span>jours travaillés</span></article>
+<article><strong id="planningTimedCount">0</strong><span>horaires saisis</span></article>
+<article><strong id="planningProvisionalCount">0</strong><span>prévisionnels</span></article>
+<article><strong id="planningHoursTotal">0 h</strong><span>effectives hors pauses</span></article>
+</div>
+<div aria-label="Filtrer le planning" class="segmented-control" id="planningFilter">
+<button class="active" data-planning-filter="all" type="button">Tout</button>
+<button data-planning-filter="work" type="button">Travail</button>
+<button data-planning-filter="provisional" type="button">Prévisionnel</button>
+</div>
+<div aria-label="Légende du planning" class="planning-legend">
+<span><i class="legend-open"></i>OPEN</span>
+<span><i class="legend-close"></i>CLOSE</span>
+<span><i class="legend-provisional"></i>Prévisionnel</span>
+</div>
+<div class="planning-list" id="planningList"></div>
+</section>
 
-        <section class="next-stop" id="nextStop" aria-labelledby="nextStopTitle">
-          <div class="stop-line" aria-hidden="true"><i></i></div>
-          <div>
-            <span class="section-caption">Prochaine étape</span>
-            <h2 id="nextStopTitle">Aucun jalon à venir</h2>
-            <p id="nextStopDate">Ajoute une date importante à ta trajectoire.</p>
-          </div>
-          <button class="arrow-button" type="button" data-go="milestones" aria-label="Voir les jalons">›</button>
-        </section>
 
-        <div class="metric-strip" aria-label="Indicateurs du contrat">
-          <article><span>Jours faits</span><strong id="daysPassed">0</strong><small id="daysTotal">sur 0</small></article>
-          <article><span>Travail restant</span><strong id="workRemaining">0</strong><small>jours</small></article>
-          <article><span>Semaines</span><strong id="weeksRemaining">0</strong><small>restantes</small></article>
-        </div>
 
-        <section class="daily-brief">
-          <div class="section-heading"><div><span class="section-caption">Brief du jour</span><h2 id="todayStatus">Une journée de plus</h2></div><span class="status-dot" id="todayStatusDot"></span></div>
-          <p id="dailyMessage">Le compteur avance, même quand on ne le regarde pas.</p>
-          <div class="mini-progress"><span id="weekProgress"></span></div>
-          <div class="brief-meta"><span id="weekLabel">Semaine 1</span><span id="nextWorkLabel">Prochain service : --</span></div>
-        </section>
-      </section>
 
-      <section class="view" id="view-planning" aria-labelledby="planningTitle">
-        <div class="view-title planning-view-title">
-          <div><p class="kicker">Vue opérationnelle</p><h1 id="planningTitle">Planning</h1></div>
-          <div class="view-actions">
-            <button class="text-button today-jump-button" id="jumpTodayPlanning" type="button" aria-label="Aller à la journée en cours dans le planning">Aujourd'hui</button>
-            <button class="text-button" type="button" data-go="calendar">Calendrier</button>
-            <button class="text-button" type="button" data-go="milestones">Jalons</button>
-          </div>
-        </div>
-        <div class="planning-summary" aria-label="Résumé du planning">
-          <article><strong id="planningDayCount">0</strong><span>jours travaillés</span></article>
-          <article><strong id="planningTimedCount">0</strong><span>horaires saisis</span></article>
-          <article><strong id="planningProvisionalCount">0</strong><span>prévisionnels</span></article>
-          <article><strong id="planningHoursTotal">0 h</strong><span>effectives hors pauses</span></article>
-        </div>
-        <div class="segmented-control" id="planningFilter" aria-label="Filtrer le planning">
-          <button class="active" type="button" data-planning-filter="all">Tout</button>
-          <button type="button" data-planning-filter="work">Travail</button>
-          <button type="button" data-planning-filter="provisional">Prévisionnel</button>
-        </div>
-        <div class="planning-legend" aria-label="Légende du planning">
-          <span><i class="legend-open"></i>OPEN</span>
-          <span><i class="legend-close"></i>CLOSE</span>
-          <span><i class="legend-provisional"></i>Prévisionnel</span>
-        </div>
-        <div class="planning-list" id="planningList"></div>
-      </section>
 
-      <section class="view" id="view-hours" aria-labelledby="hoursTitle">
-        <div class="view-title hours-view-title">
-          <div><p class="kicker">Temps de travail</p><h1 id="hoursTitle">Heures</h1></div>
-          <label class="period-select"><span>Période</span><select id="hoursPeriod" aria-label="Choisir la période"></select></label>
-        </div>
-        <section class="hours-hero">
-          <span id="hoursPeriodLabel">Tout le contrat</span>
-          <strong id="hoursGrandTotal">0 h</strong>
-          <small id="hoursShiftCount">0 shift renseigné</small>
-        </section>
-        <div class="hours-summary" aria-label="Répartition des heures">
-          <article><span>Confirmées</span><strong id="hoursConfirmed">0 h</strong></article>
-          <article><span>Prévisionnelles</span><strong id="hoursProvisional">0 h</strong></article>
-          <article><span>Moyenne / shift</span><strong id="hoursAverage">0 h</strong></article>
-        </div>
-        <section class="payroll-panel" id="payrollPanel">
-          <div class="section-heading payroll-heading"><div><span class="section-caption">Mois payé</span><h2>Prévision de paie</h2></div><strong id="payrollMonthLabel">—</strong></div>
-          <div class="payroll-unavailable" id="payrollUnavailable">Sélectionne un mois pour afficher sa prévision de paie.</div>
-          <div id="payrollContent" hidden>
-            <div class="payroll-hero">
-              <span>Net payé estimé</span>
-              <strong id="payrollNetPaidHero">0,00 €</strong>
-              <small>Base mensuelle fixe de 1 893,00 € · PAS actuel 0 %</small>
-            </div>
-            <div class="payroll-time-summary" aria-label="Temps utilisés pour la paie">
-              <article><strong id="payrollPaidTime">0 h</strong><span>payées</span></article>
-              <article><strong id="payrollNightTime">0 h</strong><span>de nuit</span></article>
-              <article><strong id="payrollLongTime">0 h</strong><span>au-delà de 7 h</span></article>
-              <article><strong id="payrollWorkedDays">0</strong><span>jours habillés</span></article>
-            </div>
-            <details class="payroll-settings">
-              <summary>Configurer la période et les variables</summary>
-              <div class="payroll-settings-grid">
-                <label class="field"><span>Début du recueil</span><input id="payrollVariableStart" type="date"></label>
-                <label class="field"><span>Fin du recueil</span><input id="payrollVariableEnd" type="date"></label>
-                <label class="field"><span>Autres éléments ordinaires (€)</span><input id="payrollOtherOrdinary" type="number" min="0" step="0.01" value="0"></label>
-                <label class="field"><span>Rappel exceptionnel brut (€)</span><input id="payrollRecall" type="number" min="0" step="0.01" value="0"></label>
-                <label class="field"><span>HS officielles à 25 % (min)</span><input id="payrollOfficialHs25" type="number" min="0" step="1" placeholder="Auto"></label>
-                <label class="field"><span>HS officielles à 50 % (min)</span><input id="payrollOfficialHs50" type="number" min="0" step="1" placeholder="Auto"></label>
-                <label class="field"><span>Prélèvement à la source (%)</span><input id="payrollWithholdingRate" type="number" min="0" max="100" step="0.01" value="0"></label>
-              </div>
-              <p>Les HS officielles, si elles sont renseignées, remplacent l’inférence par semaine civile. Taux horaire brut de référence : 12,4804 €/h.</p>
-            </details>
-            <div class="payroll-period-note" id="payrollPeriodNote"></div>
-            <div class="payroll-lines" aria-label="Détail de la prévision de paie">
-              <div><span>Salaire brut fixe</span><strong id="payrollFixed">0,00 €</strong></div>
-              <div><span>Prime de nuit</span><strong id="payrollNight">0,00 €</strong></div>
-              <div><span>Indemnité d’habillage</span><strong id="payrollDressing">0,00 €</strong></div>
-              <div><span>Majoration journées longues</span><strong id="payrollLong">0,00 €</strong></div>
-              <div><span>Autres éléments ordinaires</span><strong id="payrollOther">0,00 €</strong></div>
-              <div><span>Rappels exceptionnels</span><strong id="payrollRecallLine">0,00 €</strong></div>
-              <div><span>HS à 25 %</span><strong id="payrollHs25">0,00 €</strong></div>
-              <div><span>HS à 50 %</span><strong id="payrollHs50">0,00 €</strong></div>
-              <div class="payroll-total"><span>Brut total</span><strong id="payrollGross">0,00 €</strong></div>
-              <div><span>Net avant impôt</span><strong id="payrollNetBeforeTax">0,00 €</strong></div>
-              <div><span>Impôt estimé</span><strong id="payrollTax">0,00 €</strong></div>
-              <div class="payroll-total net"><span>Net payé estimé</span><strong id="payrollNetPaid">0,00 €</strong></div>
-            </div>
-            <p class="payroll-disclaimer">Estimation indicative pour un mois complet. Les éléments officiels du bulletin et les éventuels cycles validés par la paie restent prioritaires.</p>
-          </div>
-        </section>
-        <section class="stats-block compact-block">
-          <div class="section-heading"><div><span class="section-caption">Répartition</span><h2>Par attraction</h2></div></div>
-          <div class="stats-bars" id="hoursAttractionBars"></div>
-        </section>
-        <section class="hours-detail">
-          <div class="section-heading"><div><span class="section-caption">Détail</span><h2>Shifts comptabilisés</h2></div><strong id="hoursDetailCount">0</strong></div>
-          <div class="hours-breakdown" id="hoursBreakdown"></div>
-        </section>
-      </section>
 
-      <section class="view" id="view-calendar" aria-labelledby="calendarTitle">
-        <div class="view-title">
-          <div><p class="kicker">Trajectoire</p><h1 id="calendarTitle">Calendrier</h1></div>
-          <button class="text-button" id="jumpCurrentMonth" type="button">Ce mois</button>
-        </div>
-        <div class="segmented-control" id="calendarFilter" aria-label="Filtrer le calendrier">
-          <button class="active" type="button" data-filter="all">Tout</button>
-          <button type="button" data-filter="work">Travail</button>
-          <button type="button" data-filter="off">Repos</button>
-        </div>
-        <div class="calendar-legend" aria-label="Légende du calendrier">
-          <span><i class="legend-work"></i>Travaillé</span>
-          <span><i class="legend-off"></i>Repos</span>
-          <span><i class="legend-milestone"></i>Jalon</span>
-        </div>
-        <div class="calendar-list" id="calendarList"></div>
-      </section>
+</main>
 
-      <section class="view" id="view-grids" aria-labelledby="gridsTitle">
-        <div class="view-title">
-          <div><p class="kicker">Progression visuelle</p><h1 id="gridsTitle">Grilles</h1></div>
-          <button class="text-button" type="button" data-go="calendar">Calendrier</button>
-        </div>
-        <section class="stats-block grid-progress-block">
-          <div class="section-heading"><div><span class="section-caption">Jours calendaires</span><h2 id="calendarGridTitle">0 sur 0</h2></div><strong id="calendarGridPercent">0 %</strong></div>
-          <div class="sequence-matrix calendar-matrix" id="calendarMatrix" aria-label="Grille des jours calendaires"></div>
-          <div class="calendar-legend"><span><i class="legend-done"></i>Fait</span><span><i class="legend-today"></i>Aujourd’hui</span><span><i class="legend-off"></i>Repos</span></div>
-          <p class="planning-hint">Chaque ligne contient exactement 14 jours calendaires.</p>
-        </section>
-        <section class="stats-block grid-progress-block">
-          <div class="section-heading"><div><span class="section-caption">Jours travaillés</span><h2 id="workGridTitle">0 sur 0</h2></div><strong id="workGridPercent">0 %</strong></div>
-          <div class="sequence-matrix work-matrix" id="workMatrix" aria-label="Grille des jours travaillés"></div>
-          <div class="calendar-legend"><span><i class="legend-done"></i>Fait</span><span><i class="legend-today"></i>Aujourd’hui</span><span><i class="legend-hsm"></i>HSM</span><span><i class="legend-stt"></i>STT</span></div>
-          <p class="planning-hint">Chaque ligne contient exactement 10 jours travaillés. Touche une case pour modifier la journée.</p>
-        </section>
-      </section>
+</div>
+<div class="sheet-backdrop" hidden="" id="sheetBackdrop"></div>
 
-      <section class="view" id="view-milestones" aria-labelledby="milestonesTitle">
-        <div class="view-title">
-          <div><p class="kicker">Points de repère</p><h1 id="milestonesTitle">Jalons</h1></div>
-          <button class="round-action" id="addMilestone" type="button" aria-label="Ajouter un jalon">+</button>
-        </div>
-        <div class="milestone-summary">
-          <div><strong id="milestoneUpcomingCount">0</strong><span>à venir</span></div>
-          <div><strong id="milestoneImportantCount">0</strong><span>importants</span></div>
-          <div><strong id="milestoneDoneCount">0</strong><span>franchis</span></div>
-        </div>
-        <div class="milestone-timeline" id="milestoneList"></div>
-      </section>
+<section aria-labelledby="settingsTitle" aria-modal="true" class="bottom-sheet settings-sheet" hidden="" id="settingsSheet" role="dialog">
+<div aria-hidden="true" class="sheet-handle"></div>
+<div class="sheet-header"><div><span class="section-caption">Personnalisation</span><h2 id="settingsTitle">Réglages</h2></div><button aria-label="Fermer" class="close-button" data-close-sheet="" type="button">×</button></div>
+<form id="settingsForm">
 
-      <section class="view" id="view-stats" aria-labelledby="statsTitle">
-        <div class="view-title"><div><p class="kicker">Analyse du planning</p><h1 id="statsTitle">Stats</h1></div></div>
-        <div class="insight-grid" id="statsHighlights" aria-label="Indicateurs principaux"></div>
+<div class="field-pair"><label class="field"><span>Début</span><input id="contractStartInput" required="" type="date"/></label><label class="field"><span>Fin</span><input id="contractEndInput" required="" type="date"/></label></div>
+<fieldset class="rest-field"><legend>Jours non travaillés</legend><div id="restDayOptions"></div></fieldset>
+<button class="primary-button" type="submit">Enregistrer les réglages</button>
+</form>
 
-        <section class="stats-block">
-          <div class="section-heading"><div><span class="section-caption">Qualité du planning</span><h2>Couverture</h2></div><strong id="statsCompletionRate">0 %</strong></div>
-          <div class="quality-meter"><i id="statsCompletionBar"></i></div>
-          <div class="quality-grid" id="statsQualityGrid"></div>
-        </section>
+<section class="backup-zone shift-backup-zone">
+<span class="section-caption">Planning quotidien</span>
+<h3>Fichier des shifts</h3>
+<p>Exporte ou importe les horaires, pauses, attractions, statuts prévisionnels, jours travaillés et notes du planning.</p>
+<div class="backup-actions"><button id="exportShifts" type="button">Exporter les shifts</button><button id="importShifts" type="button">Importer</button><input accept="application/json,.json" hidden="" id="shiftBackupFile" type="file"/></div>
+<p aria-live="polite" class="backup-status" id="shiftBackupStatus"></p>
+</section>
+</section>
+<section aria-labelledby="daySheetTitle" aria-modal="true" class="bottom-sheet day-sheet" hidden="" id="daySheet" role="dialog">
+<div aria-hidden="true" class="sheet-handle"></div>
+<div class="sheet-header"><div><span class="section-caption">Planning du jour</span><h2 id="daySheetTitle">Journée</h2><p id="daySheetDate"></p></div><button aria-label="Fermer" class="close-button" data-close-sheet="" type="button">×</button></div>
+<form id="dayForm">
+<input id="dayEditDate" type="hidden"/>
+<label class="toggle-row"><span><strong>Journée travaillée</strong><small>La journée apparaîtra comme travaillée dans le planning</small></span><input id="dayWorked" type="checkbox"/><i></i></label>
+<label class="toggle-row provisional-toggle"><span><strong>Horaire prévisionnel</strong><small>À activer uniquement si le shift peut encore changer</small></span><input id="dayProvisional" type="checkbox"/><i></i></label>
+<div class="field-pair shift-time-fields"><label class="field"><span>Début planifié</span><input id="shiftStart" type="time"/></label><label class="field"><span>Fin planifiée</span><input id="shiftEnd" type="time"/></label></div>
 
-        <section class="stats-block">
-          <div class="section-heading"><div><span class="section-caption">Affectations</span><h2>Attractions</h2></div></div>
-          <div class="stats-bars" id="statsAttractionBars"></div>
-        </section>
+<fieldset class="break-field"><legend>Pauses automatiques non rémunérées</legend>
+<div class="pause-preview-summary"><div><span>Régime</span><strong id="shiftPauseRule">Aucune</strong></div><div><span>Total</span><strong id="shiftPauseTotal">0 min</strong></div><div><span>Travail effectif</span><strong id="shiftEffectiveDuration">--</strong></div></div>
+<div class="pause-editor-list" id="shiftPauseList"></div>
+<p class="pause-validation" id="shiftPauseValidation">Renseigne les horaires pour calculer les pauses.</p>
+<button class="secondary-button pause-recalculate" id="recalculatePauses" type="button">Recalculer toutes les pauses</button>
+<small>Les pauses sont réparties automatiquement. Modifie leur heure pour les verrouiller manuellement ; B dure 15 min et L dure 45 min.</small>
+</fieldset>
+<fieldset class="attraction-field"><legend>Attraction attitrée</legend><div><label><input name="attraction" type="radio" value="HSM"/><span>HSM</span></label><label><input name="attraction" type="radio" value="STT"/><span>STT</span></label><label><input name="attraction" type="radio" value=""/><span>Aucune</span></label></div></fieldset>
+<label class="field"><span>Note de journée</span><input id="shiftNote" maxlength="100" placeholder="Équipe, événement, souvenir..." type="text"/></label>
+<div class="shift-duration"><span>Amplitude planifiée</span><strong id="shiftDuration">--</strong></div>
 
-        <section class="stats-block">
-          <div class="section-heading"><div><span class="section-caption">Prise de service</span><h2>OPEN / CLOSE</h2></div></div>
-          <div class="stats-bars" id="statsRoleBars"></div>
-        </section>
+<div class="shift-auto-status"><span>Statut automatique</span><strong id="shiftAutoStatus">STANDARD</strong><small>OPEN à 06:35 ou 07:50 · CLOSE à 22:40 ou 23:25</small></div>
+<div class="sheet-actions"><button class="primary-button" type="submit">Enregistrer la journée</button><button class="danger-button" id="resetDay" type="button">Rétablir le planning par défaut</button></div>
+</form>
+</section>
+<div aria-live="polite" class="toast" hidden="" id="toast" role="status"></div>
+<script src="breaks.js"></script>
 
-        <section class="stats-block">
-          <div class="section-heading"><div><span class="section-caption">Saisonnalité</span><h2>Heures par mois</h2></div></div>
-          <div class="stats-bars month-bars" id="statsMonthBars"></div>
-        </section>
-
-        <section class="stats-block">
-          <div class="section-heading"><div><span class="section-caption">Rythme hebdomadaire</span><h2>Jours de la semaine</h2></div></div>
-          <div class="stats-bars weekday-bars" id="statsWeekdayBars"></div>
-        </section>
-
-        <section class="stats-block">
-          <div class="section-heading"><div><span class="section-caption">Intermèdes bien mérités</span><h2>Breaks &amp; lunchs</h2></div></div>
-          <div class="pause-stats-grid" id="statsPauseSummary"></div>
-          <div class="stats-bars pause-bars" id="statsPauseBars"></div>
-        </section>
-
-        <section class="stats-block">
-          <div class="section-heading"><div><span class="section-caption">Records</span><h2>Rythme du planning</h2></div></div>
-          <div class="record-grid" id="statsRecords"></div>
-        </section>
-      </section>
-
-      <section class="view" id="view-trophies" aria-labelledby="trophiesTitle">
-        <div class="game-head trophy-head">
-          <p class="kicker">Collection du contrat</p>
-          <h1 id="trophiesTitle">Trophées</h1>
-          <p>Retrouve ici tous les caps débloqués par ta progression, ton planning, tes horaires et tes jalons.</p>
-        </div>
-        <section class="level-banner game-level-banner">
-          <div class="level-medal" id="levelMedal">1</div>
-          <div><span id="levelName">Premier pas</span><h2 id="xpLabel">0 XP</h2><p id="nextLevelLabel">Prochain niveau dans 100 XP</p></div>
-          <div class="xp-ring" id="xpRing" aria-label="Progression du niveau"><span id="xpPercent">0 %</span></div>
-        </section>
-
-        <section class="stats-block achievements-block">
-          <div class="section-heading"><div><span class="section-caption">Collection</span><h2 id="achievementTotalTitle">Trophées</h2></div><strong id="achievementCount">0/0</strong></div>
-          <div class="segmented-control trophy-filter" id="trophyFilter" aria-label="Filtrer les trophées">
-            <button class="active" type="button" data-trophy-filter="next">À suivre</button>
-            <button type="button" data-trophy-filter="unlocked">Débloqués</button>
-            <button type="button" data-trophy-filter="all">Tous</button>
-          </div>
-          <div class="achievement-grid" id="achievementGrid"></div>
-        </section>
-      </section>
-    </main>
-
-    <nav class="bottom-nav" aria-label="Navigation principale">
-      <button class="active" type="button" data-view="home" aria-label="Accueil"><span class="nav-icon">⌂</span><small>Accueil</small></button>
-      <button type="button" data-view="planning" aria-label="Planning"><span class="nav-icon">▤</span><small>Planning</small></button>
-      <button type="button" data-view="hours" aria-label="Heures travaillées"><span class="nav-icon">◷</span><small>Heures</small></button>
-      <button type="button" data-view="grids" aria-label="Grilles de progression"><span class="nav-icon">▦</span><small>Grilles</small></button>
-      <button type="button" data-view="stats" aria-label="Statistiques"><span class="nav-icon">↗</span><small>Stats</small></button>
-      <button type="button" data-view="trophies" aria-label="Trophées"><span class="nav-icon">◆</span><small>Trophées</small></button>
-    </nav>
-  </div>
-
-  <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
-
-  <section class="bottom-sheet" id="milestoneSheet" role="dialog" aria-modal="true" aria-labelledby="milestoneSheetTitle" hidden>
-    <div class="sheet-handle" aria-hidden="true"></div>
-    <div class="sheet-header"><div><span class="section-caption">Point de repère</span><h2 id="milestoneSheetTitle">Nouveau jalon</h2></div><button class="close-button" type="button" data-close-sheet aria-label="Fermer">×</button></div>
-    <form id="milestoneForm">
-      <input id="milestoneEditId" type="hidden">
-      <label class="field"><span>Nom</span><input id="milestoneName" type="text" maxlength="42" placeholder="Ex. Dernière ligne droite" required></label>
-      <label class="field"><span>Date</span><input id="milestoneDate" type="date" required></label>
-      <fieldset class="color-field"><legend>Couleur dans le calendrier</legend><div id="colorOptions"></div></fieldset>
-      <label class="toggle-row"><span><strong>Jalon important</strong><small>Lueur rouge animée dans le calendrier</small></span><input id="milestoneImportant" type="checkbox"><i></i></label>
-      <div class="sheet-actions"><button class="primary-button" id="saveMilestone" type="submit">Ajouter le jalon</button><button class="danger-button" id="deleteMilestone" type="button" hidden>Supprimer</button></div>
-    </form>
-  </section>
-
-  <section class="bottom-sheet settings-sheet" id="settingsSheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
-    <div class="sheet-handle" aria-hidden="true"></div>
-    <div class="sheet-header"><div><span class="section-caption">Personnalisation</span><h2 id="settingsTitle">Réglages</h2></div><button class="close-button" type="button" data-close-sheet aria-label="Fermer">×</button></div>
-    <form id="settingsForm">
-      <label class="field"><span>Nom du contrat</span><input id="contractNameInput" type="text" maxlength="32" required></label>
-      <div class="field-pair"><label class="field"><span>Début</span><input id="contractStartInput" type="date" required></label><label class="field"><span>Fin</span><input id="contractEndInput" type="date" required></label></div>
-      <fieldset class="rest-field"><legend>Jours non travaillés</legend><div id="restDayOptions"></div></fieldset>
-      <button class="primary-button" type="submit">Enregistrer les réglages</button>
-    </form>
-    <section class="backup-zone">
-      <span class="section-caption">Données locales</span>
-      <h3>Sauvegarde complète</h3>
-      <p>Exporte les réglages, les jalons et les paramètres de paie dans un fichier conservé hors du navigateur. Le planning garde son propre fichier séparé.</p>
-      <div class="backup-actions"><button id="exportBackup" type="button">Exporter</button><button id="importBackup" type="button">Importer</button><input id="backupFile" type="file" accept="application/json,.json" hidden></div>
-      <p class="backup-status" id="backupStatus" aria-live="polite"></p>
-    </section>
-    <section class="backup-zone shift-backup-zone">
-      <span class="section-caption">Planning quotidien</span>
-      <h3>Fichier des shifts</h3>
-      <p>Ce fichier JSON contient les horaires, badgeages réels, pauses, attractions, statuts prévisionnels, jours travaillés et notes. Il est séparé des jalons.</p>
-      <div class="backup-actions"><button id="exportShifts" type="button">Exporter les shifts</button><button id="importShifts" type="button">Importer</button><input id="shiftBackupFile" type="file" accept="application/json,.json" hidden></div>
-      <p class="backup-status" id="shiftBackupStatus" aria-live="polite"></p>
-    </section>
-  </section>
-
-  <section class="bottom-sheet day-sheet" id="daySheet" role="dialog" aria-modal="true" aria-labelledby="daySheetTitle" hidden>
-    <div class="sheet-handle" aria-hidden="true"></div>
-    <div class="sheet-header"><div><span class="section-caption">Planning du jour</span><h2 id="daySheetTitle">Journée</h2><p id="daySheetDate"></p></div><button class="close-button" type="button" data-close-sheet aria-label="Fermer">×</button></div>
-    <form id="dayForm">
-      <input id="dayEditDate" type="hidden">
-      <label class="toggle-row"><span><strong>Journée travaillée</strong><small>La journée apparaîtra dans les quinzaines</small></span><input id="dayWorked" type="checkbox"><i></i></label>
-      <label class="toggle-row provisional-toggle"><span><strong>Horaire prévisionnel</strong><small>À activer uniquement si le shift peut encore changer</small></span><input id="dayProvisional" type="checkbox"><i></i></label>
-      <div class="field-pair shift-time-fields"><label class="field"><span>Début planifié</span><input id="shiftStart" type="time"></label><label class="field"><span>Fin planifiée</span><input id="shiftEnd" type="time"></label></div>
-      <fieldset class="badge-field"><legend>Badgeage réel — prioritaire pour la paie</legend><div class="field-pair"><label class="field"><span>Entrée réelle</span><input id="actualStart" type="time"></label><label class="field"><span>Sortie réelle</span><input id="actualEnd" type="time"></label></div><small>Laisse vide pour utiliser l’horaire planifié avec 5 minutes avant et 5 minutes après.</small></fieldset>
-      <fieldset class="break-field"><legend>Pauses automatiques non rémunérées</legend>
-        <div class="pause-preview-summary"><div><span>Régime</span><strong id="shiftPauseRule">Aucune</strong></div><div><span>Total</span><strong id="shiftPauseTotal">0 min</strong></div><div><span>Travail effectif</span><strong id="shiftEffectiveDuration">--</strong></div></div>
-        <div class="pause-editor-list" id="shiftPauseList"></div>
-        <p class="pause-validation" id="shiftPauseValidation">Renseigne les horaires pour calculer les pauses.</p>
-        <button class="secondary-button pause-recalculate" id="recalculatePauses" type="button">Recalculer toutes les pauses</button>
-        <small>Les pauses sont réparties automatiquement. Modifie leur heure pour les verrouiller manuellement ; B dure 15 min et L dure 45 min.</small>
-      </fieldset>
-      <fieldset class="attraction-field"><legend>Attraction attitrée</legend><div><label><input type="radio" name="attraction" value="HSM"><span>HSM</span></label><label><input type="radio" name="attraction" value="STT"><span>STT</span></label><label><input type="radio" name="attraction" value=""><span>Aucune</span></label></div></fieldset>
-      <label class="field"><span>Note de journée</span><input id="shiftNote" type="text" maxlength="100" placeholder="Équipe, événement, souvenir..."></label>
-      <div class="shift-duration"><span>Amplitude planifiée</span><strong id="shiftDuration">--</strong></div>
-      <div class="shift-duration payroll-preview"><span>Temps payé estimé</span><strong id="shiftPaidDuration">--</strong></div>
-      <div class="shift-auto-status"><span>Statut automatique</span><strong id="shiftAutoStatus">STANDARD</strong><small>OPEN à 06:35 ou 07:50 · CLOSE à 22:40 ou 23:25</small></div>
-      <div class="sheet-actions"><button class="primary-button" type="submit">Enregistrer la journée</button><button class="danger-button" id="resetDay" type="button">Rétablir le planning par défaut</button></div>
-    </form>
-  </section>
-
-  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-  <script src="breaks.js"></script>
-  <script src="payroll.js"></script>
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
