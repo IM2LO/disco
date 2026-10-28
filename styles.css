@@ -528,3 +528,6 @@ h1, h2, h3, strong { letter-spacing: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Disco1 keeps only planning and hours/payroll navigation. */
+.bottom-nav { grid-template-columns: repeat(2, 1fr); }

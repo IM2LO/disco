@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  const PAYROLL_STORAGE_KEY = "disco1-payroll-settings-v1";
+  const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const DAY_MS = 86400000;
   const SHIFT_STORAGE_KEY = "disco1-shifts-v1";
   const SETTINGS_STORAGE_KEY = "disco1-settings-v1";
@@ -22,6 +24,9 @@
   const monthYear = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
 
   const state = {
+    activeView: "planning",
+    hoursPeriod: "all",
+    payrollSettings: loadPayrollSettings(),
     planningFilter: "all",
     settings: loadSettings(),
     shifts: loadShifts(),
@@ -34,6 +39,157 @@
   };
 
   const $ = (id) => document.getElementById(id);
+  function clamp(value, min, max) { return Math.min(Math.max(value, min), max); }
+
+  function loadPayrollSettings() {
+    const saved = safeJsonParse(localStorage.getItem(PAYROLL_STORAGE_KEY), {});
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
+    return Object.fromEntries(Object.entries(saved)
+      .filter(([monthKey]) => /^\d{4}-\d{2}$/.test(monthKey))
+      .map(([monthKey, value]) => [monthKey, normalizePayrollSettings(monthKey, value)]));
+  }
+
+  function normalizePayrollSettings(monthKey, value = {}) {
+    const fallback = CapPayroll.defaultVariablePeriod(monthKey) || { start: `${monthKey}-01`, end: `${monthKey}-01` };
+    const variableStart = isDateKey(value.variableStart) ? value.variableStart : fallback.start;
+    const variableEnd = isDateKey(value.variableEnd) && value.variableEnd >= variableStart ? value.variableEnd : fallback.end;
+    return {
+      variableStart,
+      variableEnd,
+      otherOrdinary: Math.max(0, Number(value.otherOrdinary) || 0),
+      recall: Math.max(0, Number(value.recall) || 0),
+      officialHs25Minutes: normalizeOptionalMinutes(value.officialHs25Minutes),
+      officialHs50Minutes: normalizeOptionalMinutes(value.officialHs50Minutes),
+      withholdingRate: clamp(Number(value.withholdingRate) || 0, 0, 1)
+    };
+  }
+
+  function savePayrollSettings() { localStorage.setItem(PAYROLL_STORAGE_KEY, JSON.stringify(state.payrollSettings)); }
+
+  function formatMoney(value) { return euro.format(Number(value) || 0); }
+
+  function renderBarRows(containerId, items, valueFormatter = (value) => String(value)) {
+    const container = $(containerId);
+    if (!container) return;
+    const visible = items.filter((item) => item.value > 0);
+    if (!visible.length) {
+      container.innerHTML = '<div class="empty-state compact-empty">Aucune donnée suffisante pour cette période.</div>';
+      return;
+    }
+    const maximum = Math.max(...visible.map((item) => item.value), 1);
+    container.innerHTML = visible.map((item) => `<div class="stat-bar-row ${item.tone || ""}">
+      <div><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(valueFormatter(item.value))}</strong></div>
+      <div class="stat-bar-track"><i style="width:${item.value / maximum * 100}%"></i></div>
+      ${item.detail ? `<small>${escapeHtml(item.detail)}</small>` : ""}
+    </div>`).join("");
+  }
+
+  function renderHours(data) {
+    const monthKeys = [...new Set(data.allDays.map(getMonthKey))];
+    if (state.hoursPeriod !== "all" && !monthKeys.includes(state.hoursPeriod)) state.hoursPeriod = "all";
+    $("hoursPeriod").innerHTML = [
+      '<option value="all">Tout le contrat</option>',
+      ...monthKeys.map((key) => `<option value="${key}">${escapeHtml(capitalize(monthYear.format(parseDateKey(`${key}-01`))))}</option>`)
+    ].join("");
+    $("hoursPeriod").value = state.hoursPeriod;
+
+    const records = data.planning.timedRecords.filter((record) => state.hoursPeriod === "all" || record.monthKey === state.hoursPeriod);
+    const minutes = records.reduce((sum, record) => sum + record.minutes, 0);
+    const confirmedMinutes = records.filter((record) => !record.plan.provisional).reduce((sum, record) => sum + record.minutes, 0);
+    const provisionalMinutes = records.filter((record) => record.plan.provisional).reduce((sum, record) => sum + record.minutes, 0);
+    const periodLabel = state.hoursPeriod === "all" ? "Tout le contrat" : capitalize(monthYear.format(parseDateKey(`${state.hoursPeriod}-01`)));
+    setText("hoursPeriodLabel", periodLabel);
+    setText("hoursGrandTotal", formatHours(minutes));
+    setText("hoursShiftCount", `${records.length} ${plural(records.length, "shift")} renseigné${records.length > 1 ? "s" : ""}`);
+    setText("hoursConfirmed", formatHours(confirmedMinutes));
+    setText("hoursProvisional", formatHours(provisionalMinutes));
+    setText("hoursAverage", records.length ? formatHours(Math.round(minutes / records.length)) : "0 h");
+    setText("hoursDetailCount", records.length);
+
+    renderBarRows("hoursAttractionBars", [
+      { label: "HSM", value: records.filter((record) => record.plan.attraction === "HSM").reduce((sum, record) => sum + record.minutes, 0), tone: "cyan" },
+      { label: "STT", value: records.filter((record) => record.plan.attraction === "STT").reduce((sum, record) => sum + record.minutes, 0), tone: "coral" },
+      { label: "Sans attraction", value: records.filter((record) => !record.plan.attraction).reduce((sum, record) => sum + record.minutes, 0), tone: "muted" }
+    ], formatHours);
+
+    $("hoursBreakdown").innerHTML = records.length ? records.map((record) => {
+      const plan = record.plan;
+      return `<button class="hour-row ${plan.provisional ? "provisional" : ""}" type="button" data-edit-day="${record.dateKey}">
+        <span><strong>${escapeHtml(capitalize(shortDate.format(record.date)))}</strong><small>${escapeHtml(plan.attraction || "Sans attraction")} · ${escapeHtml(getShiftRoleLabel(plan))}</small></span>
+        <span><strong>${plan.start}–${plan.end}</strong><small>${escapeHtml(plan.pauseRuleCode || "Sans pause")} · ${plan.provisional ? "Prévisionnel" : "Confirmé"}</small></span>
+        <b>${escapeHtml(formatDuration(record.minutes))}</b>
+      </button>`;
+    }).join("") : '<div class="empty-state">Aucun shift avec des horaires complets sur cette période.</div>';
+
+    renderPayroll(data);
+  }
+
+  function getPayrollMonthSettings(monthKey) {
+    if (!state.payrollSettings[monthKey]) state.payrollSettings[monthKey] = normalizePayrollSettings(monthKey);
+    return state.payrollSettings[monthKey];
+  }
+
+  function renderPayroll(data) {
+    const hasMonth = state.hoursPeriod !== "all";
+    $("payrollUnavailable").hidden = hasMonth;
+    $("payrollContent").hidden = !hasMonth;
+    setText("payrollMonthLabel", hasMonth ? capitalize(monthYear.format(parseDateKey(`${state.hoursPeriod}-01`))) : "—");
+    if (!hasMonth) return;
+
+    const settings = getPayrollMonthSettings(state.hoursPeriod);
+    $("payrollVariableStart").value = settings.variableStart;
+    $("payrollVariableEnd").value = settings.variableEnd;
+    $("payrollOtherOrdinary").value = settings.otherOrdinary || 0;
+    $("payrollRecall").value = settings.recall || 0;
+    $("payrollOfficialHs25").value = settings.officialHs25Minutes === null ? "" : settings.officialHs25Minutes;
+    $("payrollOfficialHs50").value = settings.officialHs50Minutes === null ? "" : settings.officialHs50Minutes;
+    $("payrollWithholdingRate").value = Number((settings.withholdingRate * 100).toFixed(2));
+
+    const estimate = CapPayroll.estimateMonthlyPay(data.allDays.map(getShiftRecord).map((record) => record.payroll), {
+      monthKey: state.hoursPeriod,
+      ...settings
+    });
+    if (!estimate) return;
+
+    setText("payrollNetPaidHero", formatMoney(estimate.netPaid));
+    setText("payrollPaidTime", formatHours(estimate.paidMinutes));
+    setText("payrollNightTime", formatHours(estimate.nightMinutes));
+    setText("payrollLongTime", formatHours(estimate.longMinutes));
+    setText("payrollWorkedDays", estimate.workedDays);
+    setText("payrollFixed", formatMoney(estimate.lines.fixed));
+    setText("payrollNight", formatMoney(estimate.lines.night));
+    setText("payrollDressing", formatMoney(estimate.lines.dressing));
+    setText("payrollLong", formatMoney(estimate.lines.longDay));
+    setText("payrollOther", formatMoney(estimate.lines.otherOrdinary));
+    setText("payrollRecallLine", formatMoney(estimate.lines.recall));
+    setText("payrollHs25", `${formatMoney(estimate.lines.hs25)} · ${formatHours(estimate.hs25Minutes)}`);
+    setText("payrollHs50", `${formatMoney(estimate.lines.hs50)} · ${formatHours(estimate.hs50Minutes)}`);
+    setText("payrollGross", formatMoney(estimate.grossTotal));
+    setText("payrollNetBeforeTax", formatMoney(estimate.netBeforeTax));
+    setText("payrollTax", formatMoney(estimate.tax));
+    setText("payrollNetPaid", formatMoney(estimate.netPaid));
+
+    const actualDays = estimate.days.filter((day) => day.source === "actual").length;
+    const plannedDays = estimate.days.filter((day) => day.source === "planned").length;
+    const overtimeMode = estimate.usesOfficialOvertime ? "HS officielles prioritaires" : "HS inférées du lundi au dimanche";
+    setText("payrollPeriodNote", `Variables du ${estimate.variableStart.split("-").reverse().join("/")} au ${estimate.variableEnd.split("-").reverse().join("/")} · ${actualDays} par badgeage · ${plannedDays} par planning · ${overtimeMode}.`);
+  }
+
+  function updatePayrollSettingsFromForm() {
+    if (state.hoursPeriod === "all") return;
+    const monthKey = state.hoursPeriod;
+    state.payrollSettings[monthKey] = normalizePayrollSettings(monthKey, {
+      variableStart: $("payrollVariableStart").value,
+      variableEnd: $("payrollVariableEnd").value,
+      otherOrdinary: $("payrollOtherOrdinary").value,
+      recall: $("payrollRecall").value,
+      officialHs25Minutes: $("payrollOfficialHs25").value,
+      officialHs50Minutes: $("payrollOfficialHs50").value,
+      withholdingRate: Number($("payrollWithholdingRate").value) / 100
+    });
+    savePayrollSettings();
+    renderPayroll(getContractData());
+  }
 
   function safeJsonParse(raw, fallback) {
     try { return raw ? JSON.parse(raw) : fallback; } catch (error) { return fallback; }
@@ -226,6 +382,7 @@
     const minutes = amplitudeMinutes ? Math.max(0, amplitudeMinutes - pauseMinutes) : 0;
     const roles = getShiftRoles(plan);
     const dateKey = toDateKey(date);
+    const payroll = CapPayroll.buildPayrollDay({ dateKey, plan });
     return {
       date: new Date(date),
       dateKey,
@@ -234,12 +391,12 @@
       minutes,
       amplitudeMinutes,
       pauseMinutes,
+      payroll,
       roles,
       timed: amplitudeMinutes > 0,
       complete: Boolean(plan.worked && amplitudeMinutes > 0 && plan.attraction)
     };
   }
-
 
   function getPlanningStats(workDays) {
     const records = workDays.map(getShiftRecord);
@@ -351,6 +508,8 @@
     $("dayProvisional").checked = Boolean(plan.provisional);
     $("shiftStart").value = plan.start;
     $("shiftEnd").value = plan.end;
+    $("actualStart").value = plan.actualStart;
+    $("actualEnd").value = plan.actualEnd;
     state.dayPauseDraft = CapBreaks.normalizePauses(plan.pauses, { id: dateKey, dateKey });
     state.dayPauseLastStart = plan.start;
     state.dayPauseLastEnd = plan.end;
@@ -363,14 +522,14 @@
     openSheet($("daySheet"));
   }
 
-
   function updateDayFormState() {
     const worked = $("dayWorked").checked;
     if (!worked) $("dayProvisional").checked = false;
-    [$("shiftStart"), $("shiftEnd"), $("shiftNote")].forEach((input) => { input.disabled = !worked; });
+    [$("shiftStart"), $("shiftEnd"), $("actualStart"), $("actualEnd"), $("shiftNote")].forEach((input) => { input.disabled = !worked; });
     $("dayProvisional").disabled = !worked;
     document.querySelectorAll('input[name="attraction"]').forEach((input) => { input.disabled = !worked; });
     $("dayForm").querySelector(".shift-time-fields").classList.toggle("disabled", !worked);
+    $("dayForm").querySelector(".badge-field").classList.toggle("disabled", !worked);
     $("dayForm").querySelector(".break-field").classList.toggle("disabled", !worked);
     $("dayForm").querySelector(".attraction-field").classList.toggle("disabled", !worked);
     $("dayForm").querySelector(".provisional-toggle").classList.toggle("disabled", !worked);
@@ -384,7 +543,6 @@
     }
     updateShiftDuration();
   }
-
 
   function editorShift() {
     return {
@@ -496,17 +654,20 @@
       worked: $("dayWorked").checked,
       start: $("shiftStart").value,
       end: $("shiftEnd").value,
+      actualStart: $("actualStart").value,
+      actualEnd: $("actualEnd").value,
       pauses: state.dayPauseDraft
     };
     setText("shiftDuration", formatDuration(shiftDurationMinutes(plan)));
     renderPauseEditor(plan);
+    const payroll = CapPayroll.buildPayrollDay({ dateKey: $("dayEditDate").value, plan });
+    setText("shiftPaidDuration", payroll.paidMinutes ? `${formatDuration(payroll.paidMinutes)} · pause ${payroll.breakMinutes} min · ${payroll.source === "actual" ? "badgeage" : "± 5 min"}` : "--");
     const roles = getShiftRoles(plan);
     const status = $("shiftAutoStatus");
     status.textContent = roles.length ? roles.join(" + ") : "STANDARD";
     status.classList.toggle("open", roles.includes("OPEN"));
     status.classList.toggle("close", roles.includes("CLOSE"));
   }
-
 
   function setManualPauseStart(index, value) {
     const pause = state.dayPauseDraft[index];
@@ -563,7 +724,7 @@
   function exportShifts() {
     const payload = {
       app: "disco1-shifts", version: 4, savedAt: new Date().toISOString(),
-      contract: { start: state.settings.start, end: state.settings.end, restDays: state.settings.restDays }, shifts: state.shifts
+      contract: { start: state.settings.start, end: state.settings.end, restDays: state.settings.restDays }, payrollSettings: state.payrollSettings, shifts: state.shifts
     };
     downloadJson(payload, `disco1-shifts-${toDateKey(new Date())}.json`);
     setText("shiftBackupStatus", `${Object.keys(state.shifts).length} journées exportées dans un fichier séparé.`);
@@ -579,6 +740,10 @@
       if (Object.keys(source).length && !Object.keys(normalized).length) throw new Error("Planning invalide");
       if (Object.keys(state.shifts).length && !window.confirm("Remplacer le planning actuel par ce fichier ?")) return;
       state.shifts = normalized;
+      if (parsed.payrollSettings && typeof parsed.payrollSettings === "object" && !Array.isArray(parsed.payrollSettings)) {
+        state.payrollSettings = Object.fromEntries(Object.entries(parsed.payrollSettings).filter(([key]) => /^\d{4}-\d{2}$/.test(key)).map(([key, value]) => [key, normalizePayrollSettings(key, value || {})]));
+        savePayrollSettings();
+      }
       if (parsed.contract && isDateKey(parsed.contract.start) && isDateKey(parsed.contract.end) && parsed.contract.end >= parsed.contract.start) {
         state.settings = normalizeSettings({ ...state.settings, ...parsed.contract, name: "Disco1" });
         saveSettings();
@@ -594,7 +759,16 @@
 
 
   function bindEvents() {
-    document.querySelector('.brand').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    document.querySelectorAll('[data-view], [data-go]').forEach(button => button.addEventListener('click', () => {
+      state.activeView = button.dataset.view || button.dataset.go;
+      document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.id === 'view-' + state.activeView));
+      document.querySelectorAll('.bottom-nav button').forEach(item => item.classList.toggle('active', item.dataset.view === state.activeView));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }));
+    $("hoursPeriod").addEventListener("change", event => { state.hoursPeriod = event.target.value; renderHours(getContractData()); });
+    $("hoursBreakdown").addEventListener("click", event => { const button = event.target.closest("[data-edit-day]"); if (button) openDayEditor(button.dataset.editDay); });
+    ["payrollVariableStart", "payrollVariableEnd", "payrollOtherOrdinary", "payrollRecall", "payrollOfficialHs25", "payrollOfficialHs50", "payrollWithholdingRate"].forEach(id => $(id).addEventListener("change", updatePayrollSettingsFromForm));
+    ["actualStart", "actualEnd"].forEach(id => $(id).addEventListener("input", updateShiftDuration));
     $("openSettings").addEventListener("click", openSettings);
     $("sheetBackdrop").addEventListener("click", closeSheets);
     document.querySelectorAll("[data-close-sheet]").forEach((button) => button.addEventListener("click", closeSheets));
@@ -655,6 +829,8 @@
         pauseRuleCode = CapBreaks.getPauseRuleForAmplitude(amplitude);
       }
       state.shifts[date] = {
+        actualStart: isTime($("actualStart").value) ? $("actualStart").value : "",
+        actualEnd: isTime($("actualEnd").value) ? $("actualEnd").value : "",
         worked,
         start,
         end,
@@ -700,6 +876,7 @@
   function renderAll() {
     setText("headerDate", capitalize(longDate.format(new Date())));
     renderPlanning(getContractData());
+    renderHours(getContractData());
   }
   function createFormOptions() {
     $("restDayOptions").innerHTML = WEEKDAY_ORDER.map((day) => `<label class="rest-option"><input type="checkbox" name="restDay" value="${day}"><span>${WEEKDAY_SHORT[day]}</span></label>`).join("");

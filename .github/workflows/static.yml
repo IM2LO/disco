@@ -36,9 +36,9 @@ jobs:
       - name: Verify planning and prepare website
         run: |
           node --check app.js
-          node --test tests/breaks.test.js
+          node --test tests/breaks.test.js tests/payroll.test.js
           mkdir _site
-          cp index.html app.js breaks.js styles.css _site/
+          cp index.html app.js breaks.js payroll.js styles.css _site/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
